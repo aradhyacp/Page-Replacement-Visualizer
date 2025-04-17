@@ -1,0 +1,9 @@
+.gen-btn{
+    background-color: rgb(79 70 229);
+    color: white;
+    padding: 10px;
+    border-radius: 0.5rem;
+}
+.gen-btn:hover{
+    background-color: rgb(68, 61, 193);
+}
