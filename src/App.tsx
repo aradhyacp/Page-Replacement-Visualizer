@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { History, Plus, RotateCcw, Play } from 'lucide-react';
 import { suggestOptimalFrameSize } from './utils';
 import './App.css';
+import { BarChart } from '@mantine/charts';
 interface PageFrame {
   page: number;
   timestamp: number;
@@ -210,7 +211,6 @@ function App() {
   };
 
   const genRandomRef = () =>{
-    console.log("gen random ref clicked");
     let refArray = [];
     const length = 6 + Math.floor(Math.random()*7)
     console.log(length);
@@ -224,6 +224,15 @@ function App() {
     console.log(`the upadte input ${refArray}`);
     processInput(refArray);
   };
+
+  const data = [
+    {
+      name: 'Hits',
+      FIFO: comparison.FIFO.hits,
+      LRU: comparison.LRU.hits,
+      Optimal: comparison.Optimal.hits,
+    }
+  ];  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
@@ -337,6 +346,17 @@ function App() {
                   ))}
                 </div>
               </div>
+              <div className="graph">{comparison && (<BarChart
+              h={300}
+              data={data}
+            dataKey='Hits'
+            series={[
+              { name: 'FIFO', color: 'indigo.6' },
+              { name: 'LRU', color: 'blue.6' },
+              { name: 'Optimal', color: 'teal.6' },
+            ]}
+            />)}
+            </div>
                 {showBelady && (
                   <div className="bg-yellow-50 p-4 rounded-lg mt-4 border border-yellow-200">
                     <h2 className="text-md font-semibold text-yellow-700 mb-2">Belady's Anomaly Detection</h2>
