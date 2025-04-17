@@ -305,7 +305,8 @@ function App() {
               <div className="flex gap-4">
                 <button
                   onClick={simulatePageReplacement}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  disabled={input.length===0}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-200"
                 >
                   <Play className="w-4 h-4" />
                   Simulate
@@ -345,7 +346,10 @@ function App() {
                 </div>
               </div>
               <div className="graph">
-              {comparison && (<BarChart
+              {pageHits || pageFaults ?
+              <div>
+              <h2 className="text-lg font-semibold mb-2 p-4">Graph</h2>
+              <BarChart
               h={300}
               data={data}
             dataKey='Hits'
@@ -354,7 +358,8 @@ function App() {
               { name: 'LRU', color: 'blue.6' },
               { name: 'Optimal', color: 'teal.6' },
             ]}
-            />)}
+            />
+            </div>:null}
             </div>
                 {showBelady && (
                   <div className="bg-yellow-50 p-4 rounded-lg mt-4 border border-yellow-200">
