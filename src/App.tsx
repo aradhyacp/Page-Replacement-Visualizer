@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { History, Plus, RotateCcw, Play } from 'lucide-react';
 import { suggestOptimalFrameSize } from './utils';
+import './App.css';
 interface PageFrame {
   page: number;
   timestamp: number;
@@ -73,8 +74,9 @@ function App() {
     LRU: { hits: 0, faults: 0 },
     Optimal: { hits: 0, faults: 0 },
   });
-  const processInput = () => {
-    const numbers = input
+  const processInput = (randomInput) => {
+    const inputToprocess = randomInput ?? input;
+    const numbers = inputToprocess
       .split(',')
       .map(num => parseInt(num.trim()))
       .filter(num => !isNaN(num));
@@ -207,6 +209,22 @@ function App() {
     return previousFrames.includes(currentPage);
   };
 
+  const genRandomRef = () =>{
+    console.log("gen random ref clicked");
+    let refArray = [];
+    const length = 6 + Math.floor(Math.random()*7)
+    console.log(length);
+    for (let i = 0; i < length; i++) {
+      let n = Math.floor(Math.random()*10);
+      refArray.push(n);
+    };
+    console.log(refArray);
+    refArray = refArray.join(',');
+    setInput(refArray);
+    console.log(`the upadte input ${refArray}`);
+    processInput(refArray);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
       <div className="max-w-6xl mx-auto">
@@ -234,6 +252,8 @@ function App() {
                 >
                   <Plus className="w-5 h-5" />
                 </button>
+                <button className='gen-btn'
+                  onClick={genRandomRef}>Generate</button>
               </div>
 
               <div className="flex gap-4 items-center">
