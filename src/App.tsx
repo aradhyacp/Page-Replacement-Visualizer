@@ -90,8 +90,6 @@ function App() {
       setPageSequence([]);
       setSuggestedSize(null);
     }
-  
-    setInput('');
   };
 
   const findOptimalVictim = (currentFrames: PageFrame[], currentIndex: number) => {
@@ -256,7 +254,7 @@ function App() {
                   className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
                 <button
-                  onClick={processInput}
+                  onClick={()=>{processInput(input)}}
                   className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
                   <Plus className="w-5 h-5" />
@@ -346,7 +344,8 @@ function App() {
                   ))}
                 </div>
               </div>
-              <div className="graph">{comparison && (<BarChart
+              <div className="graph">
+              {comparison && (<BarChart
               h={300}
               data={data}
             dataKey='Hits'
