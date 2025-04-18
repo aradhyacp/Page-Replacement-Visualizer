@@ -2,6 +2,9 @@
 
 A web-based tool designed to visualize and analyze different page replacement algorithms, including **LRU (Least Recently Used)**, **FIFO (First In First Out)**, and **Optimal**. This tool makes it easier to understand how these algorithms work through interactive visualizations and experiments.
 
+## Watch it live
+http://page-replacement.jack1337.serv00.net/
+
 ## Key Features
 
 - **Page Replacement Algorithm Visualization**: Visualizes the working of various page replacement algorithms (LRU, FIFO, Optimal).
