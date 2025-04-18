@@ -22,7 +22,7 @@ http://page-replacement.jack1337.serv00.net/
 
 1. **Clone the repository**:
    ```
-   git clone https://github.com/your-username/page-replacement-calculator.git
+   git clone https://github.com/aradhyacp/Page-Replacement-Calc.git
    ```
 2. **Navigate into the project directory**:
 ```
