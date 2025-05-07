@@ -15,11 +15,12 @@ interface StepHistory {
   isFault: boolean;
 }
 
-type Algorithm = 'FIFO' | 'LRU' | 'Optimal';
+type Algorithm = 'FIFO' | 'LRU' | 'Optimal' | 'LFU';
 function simulate(algorithmType: Algorithm, sequence: number[], frameSize: number) {
   let currentFrames: PageFrame[] = [];
   let faults = 0;
   let hits = 0;
+  const frequencyMap: { [page: number]: number } = {};
 
   sequence.forEach((page, index) => {
     const existingPage = currentFrames.find(frame => frame.page === page);
@@ -45,6 +46,11 @@ function simulate(algorithmType: Algorithm, sequence: number[], frameSize: numbe
             });
             victimIndex = nextUse.indexOf(Math.max(...nextUse));
             break;
+          case 'LFU':
+            const minFreq = Math.min(...currentFrames.map(f => frequencyMap[f.page] || 0));
+            const candidates = currentFrames.filter(f => frequencyMap[f.page] === minFreq);
+            victimIndex = currentFrames.indexOf(candidates[0]);
+            break;
         }
         currentFrames.splice(victimIndex, 1);
       }
@@ -55,10 +61,13 @@ function simulate(algorithmType: Algorithm, sequence: number[], frameSize: numbe
         existingPage.lastUsed = index;
       }
     }
+
+    frequencyMap[page] = (frequencyMap[page] || 0) + 1;
   });
 
   return { hits, faults };
 }
+
 function App() {
   const [frames, setFrames] = useState<PageFrame[]>([]);
   const [pageSequence, setPageSequence] = useState<number[]>([]);
@@ -74,6 +83,7 @@ function App() {
     FIFO: { hits: 0, faults: 0 },
     LRU: { hits: 0, faults: 0 },
     Optimal: { hits: 0, faults: 0 },
+    LFU: {hits:0, faults: 0},
   });
   const processInput = (randomInput) => {
     const inputToprocess = randomInput ?? input;
@@ -106,6 +116,7 @@ function App() {
     let faults = 0;
     let hits = 0;
     let stepHistory: StepHistory[] = [];
+    const frequencyMap: { [page: number]: number } = {};
 
     pageSequence.forEach((page, index) => {
       const existingPage = currentFrames.find(frame => frame.page === page);
@@ -132,6 +143,11 @@ function App() {
               // Remove the page that won't be used for the longest time
               victimIndex = findOptimalVictim(currentFrames, index);
               break;
+            case 'LFU':
+              const minFreq = Math.min(...currentFrames.map(f => frequencyMap[f.page] || 0));
+              const candidates = currentFrames.filter(f => frequencyMap[f.page] === minFreq);
+              victimIndex = currentFrames.indexOf(candidates[0]);
+              break;
           }
           
           currentFrames.splice(victimIndex, 1);
@@ -148,6 +164,8 @@ function App() {
         }
       }
 
+      frequencyMap[page] = (frequencyMap[page] || 0) + 1;
+
       stepHistory.push({
         page,
         frames: currentFrames.map(f => f.page),
@@ -163,6 +181,7 @@ function App() {
       FIFO: simulate('FIFO', pageSequence, frameSize),
       LRU: simulate('LRU', pageSequence, frameSize),
       Optimal: simulate('Optimal', pageSequence, frameSize),
+      LFU: simulate('LFU', pageSequence, frameSize),
     });
     
   };
@@ -229,6 +248,7 @@ function App() {
       FIFO: comparison.FIFO.hits,
       LRU: comparison.LRU.hits,
       Optimal: comparison.Optimal.hits,
+      LFU: comparison.LFU.hits,
     }
   ];  
 
@@ -290,6 +310,7 @@ function App() {
                   <option value="FIFO">First In First Out (FIFO)</option>
                   <option value="LRU">Least Recently Used (LRU)</option>
                   <option value="Optimal">Optimal</option>
+                  <option value="LFU">Least Frequently Used (LFU)</option>
                 </select>
                 <div className="flex items-center gap-2 mt-2">
                   <label className="text-sm text-gray-600">Show Belady’s Anomaly</label>
@@ -336,7 +357,7 @@ function App() {
               <div className="bg-gray-50 p-4 rounded-lg mt-6">
                 <h2 className="text-lg font-semibold mb-2">Algorithm Comparison</h2>
                 <div className="grid grid-cols-3 gap-4">
-                  {(['FIFO', 'LRU', 'Optimal'] as Algorithm[]).map((alg) => (
+                  {(['FIFO', 'LRU', 'Optimal','LFU'] as Algorithm[]).map((alg) => (
                     <div key={alg} className="bg-white p-4 rounded-lg shadow text-center">
                       <p className="text-sm text-gray-600 font-medium">{alg}</p>
                       <p className="text-red-600 text-lg">Faults: {comparison[alg].faults}</p>
@@ -357,6 +378,7 @@ function App() {
               { name: 'FIFO', color: 'indigo.6' },
               { name: 'LRU', color: 'blue.6' },
               { name: 'Optimal', color: 'teal.6' },
+              { name: 'LFU', color: 'orange.6' },
             ]}
             />
             </div>:null}
