@@ -25,15 +25,15 @@ http://page-replacement.jack1337.serv00.net/
    git clone https://github.com/aradhyacp/Page-Replacement-Calc.git
    ```
 2. **Navigate into the project directory**:
-```
-    cd page-replacement-calculator
-```
+    ```
+        cd Page-Replacement-Calc
+    ```
 3. **Install dependencies:**
-```
-npm install
-```
+    ```
+    npm install
+    ```
 ## Running the Project Locally
 To run the project locally, use the following command
-```
-npm run dev
-```
+    ```
+    npm run dev
+    ```
