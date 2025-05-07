@@ -384,7 +384,7 @@ function App() {
             </div>:null}
             </div>
                 {showBelady && (
-                  <div className="bg-yellow-50 p-4 rounded-lg mt-4 border border-yellow-200">
+                  <div className="bg-yellow-50 p-4 rounded-lg mt-4 border border-yellow-200 mt-24">
                     <h2 className="text-md font-semibold text-yellow-700 mb-2">Belady's Anomaly Detection</h2>
                     {(() => {
                       const result = beladyCheck();
