@@ -1,4 +1,4 @@
-# Page Replacement Calculator
+# Page Replacement Visualizer
 
 A web-based tool designed to visualize and analyze different page replacement algorithms, including **LRU (Least Recently Used)**, **FIFO (First In First Out)**, **Optimal** and **LFU (Least Frequently Used)**. This tool makes it easier to understand how these algorithms work through interactive visualizations and experiments.
 
@@ -22,7 +22,7 @@ http://page-replacement.jack1337.serv00.net/
 
 1. **Clone the repository**:
    ```
-   git clone https://github.com/aradhyacp/Page-Replacement-Calc.git
+   git clone https://github.com/aradhyacp/Page-Replacement-Visualizer.git
    ```
 2. **Navigate into the project directory**:
     ```
