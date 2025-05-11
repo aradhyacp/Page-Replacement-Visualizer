@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { History, Plus, RotateCcw, Play } from 'lucide-react';
+import { Plus, RotateCcw, Play , Calculator} from 'lucide-react';
 import { suggestOptimalFrameSize } from './utils';
 import './App.css';
 import { BarChart } from '@mantine/charts';
@@ -258,8 +258,8 @@ function App() {
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
-              <History className="w-8 h-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-800">Page Replacement Algorithms</h1>
+              <Calculator className="w-8 h-8 text-indigo-600"/>
+              <h1 className="text-2xl font-bold text-gray-800">Page Replacement Visualizer</h1>
             </div>
           </div>
 
