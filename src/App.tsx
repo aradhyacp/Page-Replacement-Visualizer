@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Plus, RotateCcw, Play , Calculator} from 'lucide-react';
-import { suggestOptimalFrameSize } from './utils';
-import './App.css';
-import { BarChart } from '@mantine/charts';
+import React, { useState } from "react";
+import { Plus, RotateCcw, Play, Calculator } from "lucide-react";
+import { suggestOptimalFrameSize } from "./utils";
+import "./App.css";
+import { BarChart } from "@mantine/charts";
 interface PageFrame {
   page: number;
   timestamp: number;
@@ -15,15 +15,19 @@ interface StepHistory {
   isFault: boolean;
 }
 
-type Algorithm = 'FIFO' | 'LRU' | 'Optimal' | 'LFU';
-function simulate(algorithmType: Algorithm, sequence: number[], frameSize: number) {
+type Algorithm = "FIFO" | "LRU" | "Optimal" | "LFU";
+function simulate(
+  algorithmType: Algorithm,
+  sequence: number[],
+  frameSize: number
+) {
   let currentFrames: PageFrame[] = [];
   let faults = 0;
   let hits = 0;
   const frequencyMap: { [page: number]: number } = {};
 
   sequence.forEach((page, index) => {
-    const existingPage = currentFrames.find(frame => frame.page === page);
+    const existingPage = currentFrames.find((frame) => frame.page === page);
     const isFault = !existingPage;
 
     if (isFault) {
@@ -31,24 +35,32 @@ function simulate(algorithmType: Algorithm, sequence: number[], frameSize: numbe
       if (currentFrames.length >= frameSize) {
         let victimIndex = 0;
         switch (algorithmType) {
-          case 'FIFO':
+          case "FIFO":
             victimIndex = 0;
             break;
-          case 'LRU':
-            const leastRecent = Math.min(...currentFrames.map(f => f.lastUsed));
-            victimIndex = currentFrames.findIndex(f => f.lastUsed === leastRecent);
+          case "LRU":
+            const leastRecent = Math.min(
+              ...currentFrames.map((f) => f.lastUsed)
+            );
+            victimIndex = currentFrames.findIndex(
+              (f) => f.lastUsed === leastRecent
+            );
             break;
-          case 'Optimal':
+          case "Optimal":
             const future = sequence.slice(index + 1);
-            const nextUse = currentFrames.map(frame => {
+            const nextUse = currentFrames.map((frame) => {
               const nextIndex = future.indexOf(frame.page);
               return nextIndex === -1 ? Infinity : nextIndex;
             });
             victimIndex = nextUse.indexOf(Math.max(...nextUse));
             break;
-          case 'LFU':
-            const minFreq = Math.min(...currentFrames.map(f => frequencyMap[f.page] || 0));
-            const candidates = currentFrames.filter(f => frequencyMap[f.page] === minFreq);
+          case "LFU":
+            const minFreq = Math.min(
+              ...currentFrames.map((f) => frequencyMap[f.page] || 0)
+            );
+            const candidates = currentFrames.filter(
+              (f) => frequencyMap[f.page] === minFreq
+            );
             victimIndex = currentFrames.indexOf(candidates[0]);
             break;
         }
@@ -57,7 +69,7 @@ function simulate(algorithmType: Algorithm, sequence: number[], frameSize: numbe
       currentFrames.push({ page, timestamp: index, lastUsed: index });
     } else {
       hits++;
-      if (algorithmType === 'LRU') {
+      if (algorithmType === "LRU") {
         existingPage.lastUsed = index;
       }
     }
@@ -71,27 +83,29 @@ function simulate(algorithmType: Algorithm, sequence: number[], frameSize: numbe
 function App() {
   const [frames, setFrames] = useState<PageFrame[]>([]);
   const [pageSequence, setPageSequence] = useState<number[]>([]);
-  const [input, setInput] = useState<string>('');
+  const [input, setInput] = useState<string>("");
   const [frameSize, setFrameSize] = useState<number>(3);
   const [pageFaults, setPageFaults] = useState<number>(0);
   const [pageHits, setPageHits] = useState<number>(0);
   const [history, setHistory] = useState<StepHistory[]>([]);
-  const [algorithm, setAlgorithm] = useState<Algorithm>('FIFO');
+  const [algorithm, setAlgorithm] = useState<Algorithm>("FIFO");
   const [suggestedSize, setSuggestedSize] = useState<number | null>(null);
   const [showBelady, setShowBelady] = useState<boolean>(false);
-  const [comparison, setComparison] = useState<{ [key in Algorithm]: { hits: number; faults: number } }>({
+  const [comparison, setComparison] = useState<{
+    [key in Algorithm]: { hits: number; faults: number };
+  }>({
     FIFO: { hits: 0, faults: 0 },
     LRU: { hits: 0, faults: 0 },
     Optimal: { hits: 0, faults: 0 },
-    LFU: {hits:0, faults: 0},
+    LFU: { hits: 0, faults: 0 },
   });
   const processInput = (randomInput) => {
     const inputToprocess = randomInput ?? input;
     const numbers = inputToprocess
-      .split(',')
-      .map(num => parseInt(num.trim()))
-      .filter(num => !isNaN(num));
-  
+      .split(",")
+      .map((num) => parseInt(num.trim()))
+      .filter((num) => !isNaN(num));
+
     if (numbers.length > 0) {
       setPageSequence(numbers);
       const suggested = suggestOptimalFrameSize(numbers);
@@ -102,9 +116,12 @@ function App() {
     }
   };
 
-  const findOptimalVictim = (currentFrames: PageFrame[], currentIndex: number) => {
+  const findOptimalVictim = (
+    currentFrames: PageFrame[],
+    currentIndex: number
+  ) => {
     const future = pageSequence.slice(currentIndex + 1);
-    const nextUse = currentFrames.map(frame => {
+    const nextUse = currentFrames.map((frame) => {
       const nextIndex = future.indexOf(frame.page);
       return nextIndex === -1 ? Infinity : nextIndex;
     });
@@ -119,47 +136,55 @@ function App() {
     const frequencyMap: { [page: number]: number } = {};
 
     pageSequence.forEach((page, index) => {
-      const existingPage = currentFrames.find(frame => frame.page === page);
+      const existingPage = currentFrames.find((frame) => frame.page === page);
       const isFault = !existingPage;
-      
+
       if (isFault) {
         faults++;
         if (currentFrames.length >= frameSize) {
           let victimIndex = 0;
-          
+
           switch (algorithm) {
-            case 'FIFO':
+            case "FIFO":
               // Remove the oldest page (first in)
               victimIndex = 0;
               break;
-            
-            case 'LRU':
+
+            case "LRU":
               // Remove the least recently used page
-              const leastRecent = Math.min(...currentFrames.map(f => f.lastUsed));
-              victimIndex = currentFrames.findIndex(f => f.lastUsed === leastRecent);
+              const leastRecent = Math.min(
+                ...currentFrames.map((f) => f.lastUsed)
+              );
+              victimIndex = currentFrames.findIndex(
+                (f) => f.lastUsed === leastRecent
+              );
               break;
-            
-            case 'Optimal':
+
+            case "Optimal":
               // Remove the page that won't be used for the longest time
               victimIndex = findOptimalVictim(currentFrames, index);
               break;
-            case 'LFU':
-              const minFreq = Math.min(...currentFrames.map(f => frequencyMap[f.page] || 0));
-              const candidates = currentFrames.filter(f => frequencyMap[f.page] === minFreq);
+            case "LFU":
+              const minFreq = Math.min(
+                ...currentFrames.map((f) => frequencyMap[f.page] || 0)
+              );
+              const candidates = currentFrames.filter(
+                (f) => frequencyMap[f.page] === minFreq
+              );
               victimIndex = currentFrames.indexOf(candidates[0]);
               break;
           }
-          
+
           currentFrames.splice(victimIndex, 1);
         }
         currentFrames.push({
           page,
           timestamp: index,
-          lastUsed: index
+          lastUsed: index,
         });
       } else {
         hits++;
-        if (algorithm === 'LRU') {
+        if (algorithm === "LRU") {
           existingPage.lastUsed = index;
         }
       }
@@ -168,8 +193,8 @@ function App() {
 
       stepHistory.push({
         page,
-        frames: currentFrames.map(f => f.page),
-        isFault
+        frames: currentFrames.map((f) => f.page),
+        isFault,
       });
     });
 
@@ -178,38 +203,37 @@ function App() {
     setPageHits(hits);
     setHistory(stepHistory);
     setComparison({
-      FIFO: simulate('FIFO', pageSequence, frameSize),
-      LRU: simulate('LRU', pageSequence, frameSize),
-      Optimal: simulate('Optimal', pageSequence, frameSize),
-      LFU: simulate('LFU', pageSequence, frameSize),
+      FIFO: simulate("FIFO", pageSequence, frameSize),
+      LRU: simulate("LRU", pageSequence, frameSize),
+      Optimal: simulate("Optimal", pageSequence, frameSize),
+      LFU: simulate("LFU", pageSequence, frameSize),
     });
-    
   };
   const beladyCheck = () => {
     if (pageSequence.length === 0) return null;
-  
+
     const results = [];
     for (let size = 1; size <= frameSize + 2; size++) {
       const { faults } = simulate(algorithm, pageSequence, size);
       results.push({ size, faults });
     }
-  
+
     const anomalyPairs = [];
     for (let i = 1; i < results.length; i++) {
       if (results[i].faults > results[i - 1].faults) {
         anomalyPairs.push({
           from: results[i - 1],
-          to: results[i]
+          to: results[i],
         });
       }
     }
-  
+
     return anomalyPairs.length > 0 ? anomalyPairs : null;
   };
   const reset = () => {
     setFrames([]);
     setPageSequence([]);
-    setInput('');
+    setInput("");
     setPageFaults(0);
     setPageHits(0);
     setHistory([]);
@@ -227,16 +251,16 @@ function App() {
     return previousFrames.includes(currentPage);
   };
 
-  const genRandomRef = () =>{
+  const genRandomRef = () => {
     let refArray = [];
-    const length = 6 + Math.floor(Math.random()*7)
+    const length = 6 + Math.floor(Math.random() * 7);
     console.log(length);
     for (let i = 0; i < length; i++) {
-      let n = Math.floor(Math.random()*10);
+      let n = Math.floor(Math.random() * 10);
       refArray.push(n);
-    };
+    }
     console.log(refArray);
-    refArray = refArray.join(',');
+    refArray = refArray.join(",");
     setInput(refArray);
     console.log(`the upadte input ${refArray}`);
     processInput(refArray);
@@ -244,13 +268,13 @@ function App() {
 
   const data = [
     {
-      name: 'Hits',
+      name: "Hits",
       FIFO: comparison.FIFO.hits,
       LRU: comparison.LRU.hits,
       Optimal: comparison.Optimal.hits,
       LFU: comparison.LFU.hits,
-    }
-  ];  
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
@@ -258,8 +282,10 @@ function App() {
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
-              <Calculator className="w-8 h-8 text-indigo-600"/>
-              <h1 className="text-2xl font-bold text-gray-800">Page Replacement Visualizer</h1>
+              <Calculator className="w-8 h-8 text-indigo-600" />
+              <h1 className="text-2xl font-bold text-gray-800">
+                Page Replacement Visualizer
+              </h1>
             </div>
           </div>
 
@@ -274,13 +300,16 @@ function App() {
                   className="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
                 <button
-                  onClick={()=>{processInput(input)}}
+                  onClick={() => {
+                    processInput(input);
+                  }}
                   className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
                   <Plus className="w-5 h-5" />
                 </button>
-                <button className='gen-btn'
-                  onClick={genRandomRef}>Generate</button>
+                <button className="gen-btn" onClick={genRandomRef}>
+                  Generate
+                </button>
               </div>
 
               <div className="flex gap-4 items-center">
@@ -288,18 +317,20 @@ function App() {
                 <input
                   type="number"
                   value={frameSize}
-                  onChange={(e) => setFrameSize(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) =>
+                    setFrameSize(Math.max(1, parseInt(e.target.value) || 1))
+                  }
                   className="w-20 px-3 py-1 border rounded-lg"
                   min="1"
                 />
               </div>
-                            
+
               {suggestedSize !== null && (
                 <p className="text-sm text-indigo-600 ml-1 mt-1">
                   Suggested optimal frame size: <strong>{suggestedSize}</strong>
                 </p>
               )}
-              
+
               <div className="flex gap-4 items-center">
                 <label className="text-sm text-gray-600">Algorithm:</label>
                 <select
@@ -312,21 +343,23 @@ function App() {
                   <option value="Optimal">Optimal</option>
                   <option value="LFU">Least Frequently Used (LFU)</option>
                 </select>
-                <div className="flex items-center gap-2 mt-2">
-                  <label className="text-sm text-gray-600">Show Belady’s Anomaly</label>
+                <div className="flex items-center gap-1 mt-2">
+                  <label className="text-sm text-gray-600">
+                    Show Belady’s Anomaly
+                  </label>
                   <input
                     type="checkbox"
                     checked={showBelady}
                     onChange={() => setShowBelady(!showBelady)}
                     className="h-4 w-4 text-indigo-600"
                   />
-</div>
+                </div>
               </div>
 
               <div className="flex gap-4">
                 <button
                   onClick={simulatePageReplacement}
-                  disabled={input.length===0}
+                  disabled={input.length === 0}
                   className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-200"
                 >
                   <Play className="w-4 h-4" />
@@ -343,127 +376,170 @@ function App() {
             </div>
 
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h2 className="text-lg font-semibold mb-2">Statistics</h2>
+              <h2 className="text-lg font-semibold mb-2">
+                Statistics <span>for {algorithm}</span>
+              </h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-lg shadow">
                   <p className="text-sm text-gray-600">Page Faults</p>
-                  <p className="text-2xl font-bold text-red-600">{pageFaults}</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {pageFaults}
+                  </p>
                 </div>
                 <div className="bg-white p-4 rounded-lg shadow">
                   <p className="text-sm text-gray-600">Page Hits</p>
-                  <p className="text-2xl font-bold text-green-600">{pageHits}</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {pageHits}
+                  </p>
                 </div>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg mt-6">
-                <h2 className="text-lg font-semibold mb-2">Algorithm Comparison</h2>
+                <h2 className="text-lg font-semibold mb-2">
+                  Algorithm Comparison
+                </h2>
                 <div className="grid grid-cols-3 gap-4">
-                  {(['FIFO', 'LRU', 'Optimal','LFU'] as Algorithm[]).map((alg) => (
-                    <div key={alg} className="bg-white p-4 rounded-lg shadow text-center">
-                      <p className="text-sm text-gray-600 font-medium">{alg}</p>
-                      <p className="text-red-600 text-lg">Faults: {comparison[alg].faults}</p>
-                      <p className="text-green-600 text-lg">Hits: {comparison[alg].hits}</p>
-                    </div>
-                  ))}
+                  {(["FIFO", "LRU", "Optimal", "LFU"] as Algorithm[]).map(
+                    (alg) => (
+                      <div
+                        key={alg}
+                        className="bg-white p-4 rounded-lg shadow text-center"
+                      >
+                        <p className="text-sm text-gray-600 font-medium">
+                          {alg}
+                        </p>
+                        <p className="text-red-600 text-lg">
+                          Faults: {comparison[alg].faults}
+                        </p>
+                        <p className="text-green-600 text-lg">
+                          Hits: {comparison[alg].hits}
+                        </p>
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
               <div className="graph">
-              {pageHits || pageFaults ?
-              <div>
-              <h2 className="text-lg font-semibold mb-2 p-4">Graph</h2>
-              <BarChart
-              h={300}
-              data={data}
-            dataKey='Hits'
-            series={[
-              { name: 'FIFO', color: 'indigo.6' },
-              { name: 'LRU', color: 'blue.6' },
-              { name: 'Optimal', color: 'teal.6' },
-              { name: 'LFU', color: 'orange.6' },
-            ]}
-            />
-            </div>:null}
-            </div>
-                {showBelady && (
-                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200 mt-24">
-                    <h2 className="text-md font-semibold text-yellow-700 mb-2">Belady's Anomaly Detection</h2>
-                    {(() => {
-                      const result = beladyCheck();
-                      return result ? (
-                        <div>
-                          <p className="text-yellow-800 mb-2">Anomaly detected at:</p>
-                          <ul className="list-disc pl-5 text-yellow-900">
-                            {result.map((pair, idx) => (
-                              <li key={idx}>
-                                {`Frame Size ${pair.from.size} ➝ ${pair.to.size}: Faults increased from ${pair.from.faults} to ${pair.to.faults}`}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ) : (
-                        <p className="text-green-700">No Belady’s anomaly detected in the given input.</p>
-                      );
-                    })()}
+                {pageHits || pageFaults ? (
+                  <div>
+                    <h2 className="text-lg font-semibold mb-2 p-4">Graph</h2>
+                    <BarChart
+                      h={300}
+                      data={data}
+                      dataKey="Hits"
+                      series={[
+                        { name: "FIFO", color: "indigo.6" },
+                        { name: "LRU", color: "blue.6" },
+                        { name: "Optimal", color: "teal.6" },
+                        { name: "LFU", color: "orange.6" },
+                      ]}
+                    />
+                  </div>
+                ) : null}
+              </div>
+              {showBelady && (
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200 mt-24">
+                  <h2 className="text-md font-semibold text-yellow-700 mb-2">
+                    Belady's Anomaly Detection
+                  </h2>
+                  {(() => {
+                    const result = beladyCheck();
+                    return result ? (
+                      <div>
+                        <p className="text-yellow-800 mb-2">
+                          Anomaly detected at:
+                        </p>
+                        <ul className="list-disc pl-5 text-yellow-900">
+                          {result.map((pair, idx) => (
+                            <li key={idx}>
+                              {`Frame Size ${pair.from.size} ➝ ${pair.to.size}: Faults increased from ${pair.from.faults} to ${pair.to.faults}`}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <p className="text-green-700">
+                        No Belady’s anomaly detected in the given input.
+                      </p>
+                    );
+                  })()}
                 </div>
-                )}
+              )}
             </div>
           </div>
 
           <div className="space-y-6">
-            <div>
-              <h2 className="text-lg font-semibold mb-2">Page Sequence</h2>
-              <div className="flex flex-wrap gap-2">
-                {pageSequence.map((page, index) => (
-                  <div
-                    key={index}
-                    className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded"
-                  >
-                    {page}
-                  </div>
-                ))}
+            {pageSequence.length > 0 && (
+              <div>
+                <h2 className="text-lg font-semibold mb-2">Page Sequence</h2>
+                <div className="flex flex-wrap gap-2">
+                  {pageSequence.map((page, index) => (
+                    <div
+                      key={index}
+                      className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded"
+                    >
+                      {page}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {history.length > 0 && (
               <div className="mt-8">
-                <h2 className="text-lg font-semibold mb-4">Page Replacement Visualization</h2>
+                <h2 className="text-lg font-semibold mb-4">
+                  Page Replacement Visualization
+                </h2>
                 <div className="overflow-x-auto">
                   <table className="min-w-full border-collapse">
                     <thead>
                       <tr>
-                        <th className="px-4 py-2 bg-gray-50 border border-gray-200">Frame</th>
+                        <th className="px-4 py-2 bg-gray-50 border border-gray-200">
+                          Frame
+                        </th>
                         {pageSequence.map((page, index) => (
-                          <th key={index} className="px-4 py-2 bg-gray-50 border border-gray-200">
+                          <th
+                            key={index}
+                            className="px-4 py-2 bg-gray-50 border border-gray-200"
+                          >
                             {page}
                           </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {Array.from({ length: frameSize }).map((_, frameIndex) => (
-                        <tr key={frameIndex}>
-                          <td className="px-4 py-2 font-medium bg-gray-50 border border-gray-200">
-                            {frameIndex + 1}
-                          </td>
-                          {history.map((_, stepIndex) => {
-                            const page = getPageAtPosition(frameIndex, stepIndex);
-                            const isHit = isHitAtPosition(frameIndex, stepIndex);
-                            return (
-                              <td
-                                key={stepIndex}
-                                className={`px-4 py-2 text-center border ${
-                                  page !== null
-                                    ? isHit
-                                      ? 'bg-green-50 border-green-200'
-                                      : 'bg-white border-gray-200'
-                                    : 'bg-gray-50 border-gray-200'
-                                }`}
-                              >
-                                {page !== null ? page : '-'}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
+                      {Array.from({ length: frameSize }).map(
+                        (_, frameIndex) => (
+                          <tr key={frameIndex}>
+                            <td className="px-4 py-2 font-medium bg-gray-50 border border-gray-200">
+                              {frameIndex + 1}
+                            </td>
+                            {history.map((_, stepIndex) => {
+                              const page = getPageAtPosition(
+                                frameIndex,
+                                stepIndex
+                              );
+                              const isHit = isHitAtPosition(
+                                frameIndex,
+                                stepIndex
+                              );
+                              return (
+                                <td
+                                  key={stepIndex}
+                                  className={`px-4 py-2 text-center border ${
+                                    page !== null
+                                      ? isHit
+                                        ? "bg-green-50 border-green-200"
+                                        : "bg-white border-gray-200"
+                                      : "bg-gray-50 border-gray-200"
+                                  }`}
+                                >
+                                  {page !== null ? page : "-"}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        )
+                      )}
                       <tr>
                         <td className="px-4 py-2 font-medium bg-gray-50 border border-gray-200">
                           Status
@@ -473,11 +549,11 @@ function App() {
                             key={index}
                             className={`px-4 py-2 text-center border ${
                               step.isFault
-                                ? 'bg-red-50 border-red-200 text-red-700'
-                                : 'bg-green-50 border-green-200 text-green-700'
+                                ? "bg-red-50 border-red-200 text-red-700"
+                                : "bg-green-50 border-green-200 text-green-700"
                             }`}
                           >
-                            {step.isFault ? 'Miss' : 'Hit'}
+                            {step.isFault ? "Miss" : "Hit"}
                           </td>
                         ))}
                       </tr>
@@ -488,6 +564,30 @@ function App() {
             )}
           </div>
         </div>
+      </div>
+      <div className="flex flex-row justify-between items-center px-10 py-1 mt-8 border-t-2 border-gray-300">
+        <div className="text-[#4b5563]">Made with ❤️ by ACP.IO</div>
+        <a
+          className="hover:text-[#4f46e5] rounded-full p-4 transition-all duration-300 hover:bg-gray-300"
+          href="https://github.com/aradhyacp/Page-Replacement-Visualizer"
+          target="_blank"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            className="lucide lucide-github-icon lucide-github"
+          >
+            <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+            <path d="M9 18c-4.51 2-5-2-7-2" />
+          </svg>
+        </a>
       </div>
     </div>
   );
